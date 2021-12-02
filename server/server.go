@@ -10,8 +10,14 @@ import (
 )
 
 func NewHTTPServer(logger *zap.Logger, dataSource types.DataRetriver) *http.Server {
-	http.HandleFunc("/echo", echo.NewEchoHandler(logger))
-	http.HandleFunc("/data", data.NewDataHandler(logger, dataSource))
+	handlers := []types.HttpHandler{
+		echo.NewEchoHandler(logger),
+		data.NewDataHandler(logger, dataSource),
+	}
+
+	for _, h := range handlers {
+		http.HandleFunc(h.Path(), h.Handle)
+	}
 
 	return &http.Server{
 		Addr: ":8080",

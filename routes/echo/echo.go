@@ -8,16 +8,28 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewEchoHandler(logger *zap.Logger) types.HttpHandler {
-	return func(w http.ResponseWriter, req *http.Request) {
-		logger.Info("inbound", zap.String("path", req.URL.Path), zap.String("method", req.Method))
+var _ types.HttpHandler = (*handler)(nil)
 
-		body, err := io.ReadAll(req.Body)
-		if err != nil {
-			logger.Error("failed to read request body", zap.Error(err))
-			w.WriteHeader(500)
-		}
+type handler struct {
+	logger *zap.Logger
+}
 
-		w.Write(body)
+func (h handler) Path() string {
+	return "/echo"
+}
+
+func (h handler) Handle(w http.ResponseWriter, req *http.Request) {
+	h.logger.Info("inbound", zap.String("path", req.URL.Path), zap.String("method", req.Method))
+
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		h.logger.Error("failed to read request body", zap.Error(err))
+		w.WriteHeader(500)
 	}
+
+	w.Write(body)
+}
+
+func NewEchoHandler(logger *zap.Logger) types.HttpHandler {
+	return &handler{logger: logger}
 }
