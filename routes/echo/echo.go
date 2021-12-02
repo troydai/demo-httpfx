@@ -5,14 +5,23 @@ import (
 	"net/http"
 
 	"github.com/troydai/demo-httpfx/types"
+	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
 
 var _ types.HttpHandler = (*handler)(nil)
 
-type handler struct {
-	logger *zap.Logger
-}
+type (
+	handler struct {
+		logger *zap.Logger
+	}
+
+	Result struct {
+		fx.Out
+
+		Handler types.HttpHandler `group:"handlers"`
+	}
+)
 
 func (h handler) Path() string {
 	return "/echo"
@@ -30,6 +39,8 @@ func (h handler) Handle(w http.ResponseWriter, req *http.Request) {
 	w.Write(body)
 }
 
-func NewEchoHandler(logger *zap.Logger) types.HttpHandler {
-	return &handler{logger: logger}
+func NewEchoHandler(logger *zap.Logger) Result {
+	return Result{
+		Handler: &handler{logger: logger},
+	}
 }

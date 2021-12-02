@@ -3,19 +3,18 @@ package server
 import (
 	"net/http"
 
-	"github.com/troydai/demo-httpfx/routes/data"
-	"github.com/troydai/demo-httpfx/routes/echo"
 	"github.com/troydai/demo-httpfx/types"
-	"go.uber.org/zap"
+	"go.uber.org/fx"
 )
 
-func NewHTTPServer(logger *zap.Logger, dataSource types.DataRetriver) *http.Server {
-	handlers := []types.HttpHandler{
-		echo.NewEchoHandler(logger),
-		data.NewDataHandler(logger, dataSource),
-	}
+type Param struct {
+	fx.In
 
-	for _, h := range handlers {
+	Handlers []types.HttpHandler `group:"handlers"`
+}
+
+func NewHTTPServer(param Param) *http.Server {
+	for _, h := range param.Handlers {
 		http.HandleFunc(h.Path(), h.Handle)
 	}
 

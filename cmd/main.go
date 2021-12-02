@@ -6,6 +6,8 @@ import (
 
 	"github.com/troydai/demo-httpfx/database"
 	"github.com/troydai/demo-httpfx/logging"
+	"github.com/troydai/demo-httpfx/routes/data"
+	"github.com/troydai/demo-httpfx/routes/echo"
 	"github.com/troydai/demo-httpfx/server"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -17,6 +19,8 @@ func main() {
 			logging.NewLogger,
 			database.NewDataSource,
 			server.NewHTTPServer,
+			data.NewDataHandler,
+			echo.NewEchoHandler,
 		),
 		fx.Invoke(
 			StartServer,
